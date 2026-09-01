@@ -1,0 +1,22 @@
+# Python
+backend/venv/
+__pycache__/
+*.py[cod]
+
+# Environment
+.env
+.env.*
+
+# IDE
+.vscode/
+.idea/
+
+# macOS
+.DS_Store
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Logs
+*.log

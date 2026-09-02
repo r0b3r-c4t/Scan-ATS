@@ -15,46 +15,33 @@ class DocumentService:
         return file.read()
 
     @staticmethod
-    def extract_pdf_text(pdf_data: bytes) -> str:
-        document = pymupdf.open(
-            stream=pdf_data,
-            filetype="pdf"
-        )
-
-        text_parts = []
-
-        for page in document:
-            text = page.get_text("text").strip()
-
-            if text:
-                text_parts.append(text)
-
-        document.close()
-
-        return "\n\n".join(text_parts)
+    def extract_page_text(page) -> str:
+        """
+        Extrae el texto de una página individual.
+        """
+        return page.get_text("text").strip()
 
     @staticmethod
-    def pdf_to_images(pdf_data: bytes) -> list[bytes]:
-        document = pymupdf.open(
-            stream=pdf_data,
-            filetype="pdf"
+    def render_page(page) -> bytes:
+        """
+        Convierte una página a JPEG optimizado para visión.
+        """
+        pixmap = page.get_pixmap(
+            matrix=pymupdf.Matrix(1.25, 1.25),
+            alpha=False
         )
 
-        images = []
+        image_data = pixmap.tobytes(
+            "jpeg",
+            jpg_quality=90
+        )
 
-        for page in document:
-            pixmap = page.get_pixmap(
-                matrix=pymupdf.Matrix(2, 2),
-                alpha=False
-            )
+        print(
+            f"Page {page.number + 1}: "
+            f"{len(image_data) / 1024:.1f} KB"
+        )
 
-            images.append(
-                pixmap.tobytes("png")
-            )
-
-        document.close()
-
-        return images
+        return image_data
 
     @classmethod
     def get_resume_content(
@@ -64,19 +51,76 @@ class DocumentService:
 
         pdf_data = cls.get_file(file_id)
 
-        text = cls.extract_pdf_text(pdf_data)
+        document = pymupdf.open(
+            stream=pdf_data,
+            filetype="pdf"
+        )
 
-        if len(text.strip()) >= cls.MIN_TEXT_LENGTH:
+        pages = []
+
+        total_text_length = 0
+        image_pages = 0
+
+        for page in document:
+
+            text = cls.extract_page_text(page)
+
+            if len(text) >= cls.MIN_TEXT_LENGTH:
+                pages.append({
+                    "page": page.number + 1,
+                    "type": "text",
+                    "content": text
+                })
+
+                total_text_length += len(text)
+
+            else:
+                image_data = cls.render_page(page)
+
+                pages.append({
+                    "page": page.number + 1,
+                    "type": "image",
+                    "content": image_data
+                })
+
+                image_pages += 1
+
+        document.close()
+
+        # Si todas las páginas tienen texto,
+        # mantenemos exactamente el flujo anterior.
+        if image_pages == 0:
+
+            text = "\n\n".join(
+                page["content"]
+                for page in pages
+            )
+
             return {
                 "type": "text",
                 "content": text
             }
 
-        images = cls.pdf_to_images(pdf_data)
+        # Si ninguna página tiene texto,
+        # mantenemos el flujo anterior de imágenes.
+        if total_text_length == 0:
 
+            images = [
+                page["content"]
+                for page in pages
+            ]
+
+            return {
+                "type": "images",
+                "content": images
+            }
+
+        # Documento híbrido:
+        # algunas páginas contienen texto
+        # y otras necesitan visión.
         return {
-            "type": "images",
-            "content": images
+            "type": "hybrid",
+            "content": pages
         }
 
     @classmethod
@@ -87,4 +131,19 @@ class DocumentService:
 
         pdf_data = cls.get_file(file_id)
 
-        return cls.pdf_to_images(pdf_data)
+        document = pymupdf.open(
+            stream=pdf_data,
+            filetype="pdf"
+        )
+
+        images = []
+
+        for page in document:
+
+            image_data = cls.render_page(page)
+
+            images.append(image_data)
+
+        document.close()
+
+        return images

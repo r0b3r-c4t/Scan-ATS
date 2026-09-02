@@ -1,3 +1,5 @@
+import time
+
 from bson import ObjectId
 from fastapi import APIRouter, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse
@@ -24,55 +26,74 @@ ALLOWED_CONTENT_TYPES = {
 
 @router.post("/upload")
 async def upload_resume(file: UploadFile = File(...)):
-    if file.content_type not in ALLOWED_CONTENT_TYPES:
+    total_start = time.perf_counter()
+    content_type = file.content_type
+    if content_type is None or content_type not in ALLOWED_CONTENT_TYPES:
         raise HTTPException(
             status_code=400,
             detail="Unsupported file type"
         )
 
+    start = time.perf_counter()
     file_data = await file.read()
+    read_time = time.perf_counter() - start
 
     if not file_data:
         raise HTTPException(
             status_code=400,
             detail="Empty file"
         )
-
+    start = time.perf_counter()
     file_id = save_file(
         file_data=file_data,
-        filename=file.filename,
-        content_type=file.content_type
+        filename=file.filename or "resume",
+        content_type=content_type,
     )
 
+    gridfs_time = time.perf_counter() - start
+    start = time.perf_counter()
+
     try:
-        images = DocumentService.get_resume_images(str(file_id))
+        resume_content = DocumentService.get_resume_content(
+            str(file_id)
+        )
+
     except Exception as e:
         raise HTTPException(
             status_code=500,
             detail=f"Error processing document: {str(e)}"
         )
 
-    if not images:
-        raise HTTPException(
-            status_code=400,
-            detail="Could not extract pages from document"
-        )
+    document_time = time.perf_counter() - start
+
+    print(f"Document type: {resume_content['type']}")
+
+    start = time.perf_counter()
 
     try:
-        candidate_data = AIService().analyze_resume(images)
+        ai_service = AIService()
+
+        candidate_data = ai_service.analyze_resume(
+            content=resume_content["content"],
+            content_type=resume_content["type"]
+        )
+
     except Exception as e:
         raise HTTPException(
             status_code=500,
             detail=f"Error analyzing resume: {str(e)}"
         )
 
+    ai_time = time.perf_counter() - start
+
     candidate_data["resume"] = {
         "file_id": str(file_id),
-        "filename": file.filename,
-        "content_type": file.content_type,
-        "size": len(file_data)
+        "filename": file.filename or "resume",
+        "content_type": content_type,
+        "size": len(file_data),
     }
 
+    start = time.perf_counter()
     try:
         candidate_id = create_candidate(candidate_data)
     except Exception as e:
@@ -80,23 +101,51 @@ async def upload_resume(file: UploadFile = File(...)):
             status_code=500,
             detail=f"Error saving candidate: {str(e)}"
         )
+    database_time = time.perf_counter() - start
+    
+    
+    start = time.perf_counter()
 
-    # EVALUATE CANDIDATE AND UPDATE IN DATABASE
     try:
         candidate_data["candidate_score"] = evaluate_candidate(candidate_data)
+
         candidates_collection.update_one(
             {"_id": candidate_id},
             {"$set": {"candidate_score": candidate_data["candidate_score"]}}
         )
+
     except Exception as e:
         print(f"Error evaluating candidate: {str(e)}")
         # Don't fail the upload if evaluation fails
         candidate_data["candidate_score"] = None
 
+    evaluation_time = time.perf_counter() - start
+
+    total_time = time.perf_counter() - total_start
+    print("\n=== SCAN-ATS TIMING ===")
+    print(f"Read file:       {read_time:.3f}s")
+    print(f"Save GridFS:     {gridfs_time:.3f}s")
+    print(f"Document:        {document_time:.3f}s")
+    print(f"AI analysis:     {ai_time:.3f}s")
+    print(f"Save candidate:  {database_time:.3f}s")
+    print(f"Evaluation:      {evaluation_time:.3f}s")
+    print("------------------------")
+    print(f"TOTAL:           {total_time:.3f}s")
+    print("========================\n")
+
     return {
         "message": "Resume processed successfully",
         "candidate_id": str(candidate_id),
-        "candidate": candidate_data
+        "candidate": candidate_data,
+        "timing": {
+            "read_file": round(read_time, 3),
+            "gridfs": round(gridfs_time, 3),
+            "document": round(document_time, 3),
+            "ai": round(ai_time, 3),
+            "database": round(database_time, 3),
+            "evaluation": round(evaluation_time, 3),
+            "total": round(total_time, 3),
+        },
     }
 
 

@@ -6,7 +6,6 @@
 .sidebar {
   width: 250px;
   background-color: #0a6345;
-  border-right: 1px solid #E5E7EB;
   display: flex;
   flex-direction: column;
   padding: 1.5rem 0;
@@ -80,6 +79,7 @@
   gap: 0.5rem;
   padding: 0 0.75rem;
   flex: 1;
+  margin-right: 0;
 }
 
 .sidebar-footer {
@@ -107,8 +107,8 @@
 }
 
 .nav-link.active {
-  background-color: rgba(27, 94, 59, 0.1);
-  color: #FFFF;
+  background-color: rgba(10, 99, 69, 0.1);
+  color: #FFFFFF;
 }
 
 .nav-icon {
@@ -134,12 +134,13 @@
 }
 
 .header {
-  background-color: #FFFFFF;
-  border-bottom: 1px solid #E5E7EB;
+  background-color: #57585a;
+  border-bottom: 1px solid #57585a;
   padding: 1rem 1.5rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-left: 0;
 }
 
 .header-content {
@@ -165,8 +166,8 @@
 }
 
 .user-badge {
-  background-color: rgba(27, 94, 59, 0.1);
-  color: #1B5E3B;
+  background-color: rgba(10, 99, 69, 0.1);
+  color: #F3F4F6;
   padding: 0.5rem 1rem;
   border-radius: 8px;
   font-size: 0.875rem;

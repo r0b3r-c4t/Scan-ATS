@@ -1,0 +1,168 @@
+.candidate-detail {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.btn-back {
+  background: none;
+  border: none;
+  color: #1B5E3B;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 1.5rem;
+  padding: 0;
+  transition: all 0.2s ease;
+}
+
+.btn-back:hover {
+  opacity: 0.7;
+}
+
+.candidate-header {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  align-items: start;
+}
+
+.candidate-info h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  color: #0A0A0A;
+}
+
+.header-top {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.header-top h1 {
+  margin: 0 !important;
+}
+
+.btn-view-resume {
+  background-color: #1B5E3B;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-view-resume:hover {
+  background-color: #144630;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(27, 94, 59, 0.2);
+}
+
+.btn-view-resume:active {
+  transform: translateY(0);
+}
+
+.candidate-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.9375rem;
+  color: #6B7280;
+  margin: 0;
+}
+
+.candidate-score-section {
+  display: flex;
+  justify-content: center;
+}
+
+.candidate-section {
+  background-color: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.candidate-section h2 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0 0 1.5rem 0;
+  color: #0A0A0A;
+}
+
+/* Experience */
+.experience-list,
+.education-list,
+.certifications-list,
+.projects-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.experience-item,
+.education-item,
+.certification-item,
+.project-item {
+  padding: 1rem;
+  background-color: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+}
+
+.experience-item h3,
+.education-item h3,
+.certification-item h3,
+.project-item h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  color: #0A0A0A;
+}
+
+.company,
+.school {
+  font-size: 0.875rem;
+  color: #1B5E3B;
+  font-weight: 500;
+  margin: 0 0 0.25rem 0;
+}
+
+.period,
+.year {
+  font-size: 0.8125rem;
+  color: #6B7280;
+  margin: 0 0 0.5rem 0;
+}
+
+.experience-item p:last-child,
+.project-item p:last-child {
+  margin: 0.5rem 0 0 0;
+  color: #6B7280;
+}
+
+.summary-text {
+  background-color: #F9FAFB;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #E5E7EB;
+  line-height: 1.6;
+  color: #6B7280;
+}
+
+@media (max-width: 768px) {
+  .candidate-header {
+    grid-template-columns: 1fr;
+  }
+
+  .candidate-info h1 {
+    font-size: 1.5rem;
+  }
+}

@@ -1,55 +1,58 @@
-from ollama import chat
+from ollama import Client
+import json
 
 
 class AIService:
 
     def __init__(self):
-        self.model = "qwen3-vl:4b"
+        self.model = "scan-ats-qwen3-vl-instruct:4b"
+        self.client = Client(host="http://127.0.0.1:11434")
 
-    def analyze_resume(
-        self,
-        images: list[bytes]
-    ) -> str:
+    def analyze_resume(self, images: list[bytes]) -> str:
 
-        response = chat(
-    model=self.model,
-    messages=[
-        {
-            "role": "user",
-            "content": self._build_prompt(),
-            "images": images
-        }
-    ],
-    options={
-        "num_predict": 500
-    }
-)
+        response = self.client.chat(
+            model=self.model,
+            messages=[
+                {
+                    "role": "user",
+                    "content": self._build_prompt(),
+                    "images": images
+                }
+            ],
+            format="json",
+            options={
+                "num_ctx": 8192,
+                "num_predict": 3000,
+                "temperature": 0
+            }
+        )
 
         print("=== RAW OLLAMA RESPONSE ===")
         print(response)
-        print("============================")
-
-        print("MESSAGE:")
-        print(response.message)
 
         print("CONTENT:")
         print(repr(response.message.content))
 
-        return response.message.content
+        print("THINKING:")
+        print(repr(response.message.thinking))
 
-    @staticmethod
-    def _build_prompt() -> str:
+        if not response.message.content:
+            raise RuntimeError(
+                "Ollama returned no final content."
+            )
+
+        try:
+            data = json.loads(response.message.content)
+        except json.JSONDecodeError as e:
+            raise RuntimeError(f"Invalid JSON returned by Ollama: {e}")
+        
+        return data
+
+    def _build_prompt(self) -> str:
         return """
-Analyze this resume for an Applicant Tracking System.
+Analiza el CV proporcionado y extrae únicamente la información visible.
 
-Extract the information visible in all pages.
-
-Return ONLY valid JSON.
-Do not provide explanations.
-Do not provide reasoning.
-Do not describe your analysis.
-
-Use exactly this structure:
+Devuelve ÚNICAMENTE un JSON válido con esta estructura:
 
 {
     "name": null,
@@ -60,15 +63,21 @@ Use exactly this structure:
     "skills": [],
     "experience": [],
     "education": [],
-    "certifications": []
+    "certifications": [],
+    "projects": []
 }
 
-Rules:
-- Extract only information actually present in the resume.
-- Never invent information.
-- Use null when a single-value field is missing.
-- Use [] when a list has no information.
-- Combine information from all pages.
-- Keep the original wording where practical.
-- Return JSON only.
+Reglas:
+
+- Extrae únicamente información visible en el CV.
+- No inventes información.
+- Si un campo individual no aparece, utiliza null.
+- Si una lista no contiene información, utiliza [].
+- Analiza toda la información disponible.
+- Mantén el contenido original cuando sea posible.
+- No agregues explicaciones.
+- No utilices Markdown.
+- La respuesta debe ser únicamente JSON válido.
+- Identifica proyectos personales, académicos o profesionales mencionados en el CV.
+- No confundas proyectos con experiencia laboral.
 """

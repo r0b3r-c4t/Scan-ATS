@@ -1,0 +1,107 @@
+.score-ring {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.score-ring svg {
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.1));
+}
+
+.score-ring-bg {
+  fill: none;
+  stroke: #E5E7EB;
+  stroke-width: 4;
+}
+
+.score-ring-progress {
+  fill: none;
+  stroke-width: 4;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.3s ease;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+}
+
+.score-ring-content {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.score-ring-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #0A0A0A;
+}
+
+.score-ring-max {
+  font-size: 0.875rem;
+  color: #6B7280;
+}
+
+.score-ring-md .score-ring-value {
+  font-size: 1.5rem;
+}
+
+.score-ring-lg .score-ring-value {
+  font-size: 2.5rem;
+}
+
+.score-ring-sm .score-ring-value {
+  font-size: 1rem;
+}
+
+.score-card {
+  background-color: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.score-card:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.score-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.score-card-icon {
+  font-size: 1.5rem;
+}
+
+.score-card-header h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+  color: #0A0A0A;
+}
+
+.score-card-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.score-card-classification {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #1B5E3B;
+  margin: 0;
+}

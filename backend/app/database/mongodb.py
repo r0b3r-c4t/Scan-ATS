@@ -11,6 +11,8 @@ database = client[DATABASE_NAME]
 grid_fs = GridFS(database)
 
 
-def check_database_connection():
-    client.admin.command("ping")
-    return True
+candidates_collection = database["candidates"]
+jobs_collection = database["jobs"]
+analyses_collection = database["analyses"]
+
+grid_fs = GridFS(database)

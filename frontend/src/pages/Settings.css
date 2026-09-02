@@ -1,0 +1,16 @@
+.settings-page {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.settings-page h1 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
+  color: #0A0A0A;
+}
+
+.settings-page p {
+  color: #6B7280;
+  font-size: 0.9375rem;
+}
